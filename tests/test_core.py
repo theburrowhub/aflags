@@ -4,8 +4,12 @@ Tests for core feature flag functionality.
 
 import pytest
 from unittest.mock import patch
+import os
 
 from aflags.core import FeatureFlag, FeatureFlagSource, FlagType, FeatureFlagManager
+from aflags.sources.json import JsonSource
+from aflags.sources.yaml import YamlSource
+from aflags.sources.env import EnvSource
 
 
 def test_boolean_flag():
@@ -194,4 +198,27 @@ def test_feature_flag_manager_reload():
     # Change the flag value
     source.value = False
     manager.reload()
-    assert manager.is_enabled("test_flag") is False 
+    assert manager.is_enabled("test_flag") is False
+
+
+def test_feature_flag_manager_constructors():
+    """Test semantic constructors for feature flag manager."""
+    # Test JSON constructor
+    json_manager = FeatureFlagManager.from_json("flags.json")
+    assert isinstance(json_manager._source, JsonSource)
+    assert json_manager._source._file_path == "flags.json"
+    
+    # Test YAML constructor
+    yaml_manager = FeatureFlagManager.from_yaml("flags.yaml")
+    assert isinstance(yaml_manager._source, YamlSource)
+    assert yaml_manager._source._file_path == "flags.yaml"
+    
+    # Test environment constructor with default prefix
+    env_manager = FeatureFlagManager.from_env()
+    assert isinstance(env_manager._source, EnvSource)
+    assert env_manager._source.prefix == "AFLAG_"
+    
+    # Test environment constructor with custom prefix
+    custom_env_manager = FeatureFlagManager.from_env(prefix="CUSTOM_")
+    assert isinstance(custom_env_manager._source, EnvSource)
+    assert custom_env_manager._source.prefix == "CUSTOM_" 

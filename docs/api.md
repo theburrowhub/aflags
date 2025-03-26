@@ -62,12 +62,62 @@ The main class for managing feature flags from a source.
 
 ```python
 from aflags.core import FeatureFlagManager
-from aflags.sources.json import JsonSource
 
+# Using semantic constructors
+manager = FeatureFlagManager.from_json("flags.json")
+manager = FeatureFlagManager.from_yaml("flags.yaml")
+manager = FeatureFlagManager.from_env(prefix="FEATURE_")
+
+# Or using the base constructor
+from aflags.sources.json import JsonSource
 manager = FeatureFlagManager(JsonSource("flags.json"))
 ```
 
-#### Methods
+#### Class Methods
+
+##### from_json(file_path: str) -> FeatureFlagManager
+
+Create a feature flag manager from a JSON file.
+
+```python
+manager = FeatureFlagManager.from_json("flags.json")
+```
+
+Parameters:
+- `file_path` (str): Path to the JSON file containing feature flags.
+
+Returns:
+- `FeatureFlagManager`: A new feature flag manager instance.
+
+##### from_yaml(file_path: str) -> FeatureFlagManager
+
+Create a feature flag manager from a YAML file.
+
+```python
+manager = FeatureFlagManager.from_yaml("flags.yaml")
+```
+
+Parameters:
+- `file_path` (str): Path to the YAML file containing feature flags.
+
+Returns:
+- `FeatureFlagManager`: A new feature flag manager instance.
+
+##### from_env(prefix: str = "AFLAG_") -> FeatureFlagManager
+
+Create a feature flag manager from environment variables.
+
+```python
+manager = FeatureFlagManager.from_env(prefix="FEATURE_")
+```
+
+Parameters:
+- `prefix` (str): Prefix for environment variable names. Defaults to "AFLAG_".
+
+Returns:
+- `FeatureFlagManager`: A new feature flag manager instance.
+
+#### Instance Methods
 
 ##### reload() -> None
 

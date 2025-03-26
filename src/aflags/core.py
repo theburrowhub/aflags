@@ -122,6 +122,45 @@ class FeatureFlagManager:
         self._flags: Dict[str, FeatureFlag] = {}
         self.reload()
     
+    @classmethod
+    def from_json(cls, file_path: str) -> 'FeatureFlagManager':
+        """Create a feature flag manager from a JSON file.
+        
+        Args:
+            file_path: Path to the JSON file containing feature flags.
+            
+        Returns:
+            FeatureFlagManager: A new feature flag manager instance.
+        """
+        from .sources.json import JsonSource
+        return cls(JsonSource(file_path))
+    
+    @classmethod
+    def from_yaml(cls, file_path: str) -> 'FeatureFlagManager':
+        """Create a feature flag manager from a YAML file.
+        
+        Args:
+            file_path: Path to the YAML file containing feature flags.
+            
+        Returns:
+            FeatureFlagManager: A new feature flag manager instance.
+        """
+        from .sources.yaml import YamlSource
+        return cls(YamlSource(file_path))
+    
+    @classmethod
+    def from_env(cls, prefix: str = "AFLAG_") -> 'FeatureFlagManager':
+        """Create a feature flag manager from environment variables.
+        
+        Args:
+            prefix: Prefix for environment variable names. Defaults to "AFLAG_".
+            
+        Returns:
+            FeatureFlagManager: A new feature flag manager instance.
+        """
+        from .sources.env import EnvSource
+        return cls(EnvSource(prefix))
+    
     def reload(self) -> None:
         """Reload feature flags from the source."""
         self._flags = self._source.get_flags()

@@ -27,10 +27,9 @@ pip install aflags
 
 ```python
 from aflags.core import FeatureFlagManager
-from aflags.sources.json import JsonSource
 
 # Initialize with JSON source
-manager = FeatureFlagManager(JsonSource("flags.json"))
+manager = FeatureFlagManager.from_json("flags.json")
 
 # Check if a feature is enabled for anonymous user
 if manager.is_enabled("my_feature"):
@@ -100,10 +99,9 @@ FEATURE_BETA=100‰
 
 ```python
 from aflags.core import FeatureFlagManager
-from aflags.sources.json import JsonSource
 
 # Initialize manager with JSON source
-manager = FeatureFlagManager(JsonSource("flags.json"))
+manager = FeatureFlagManager.from_json("flags.json")
 
 # Check boolean flag for anonymous user
 if manager.is_enabled("dark_mode"):
@@ -122,14 +120,12 @@ if manager.is_enabled("beta_feature"):
 
 ```python
 from aflags.core import FeatureFlagManager
-from aflags.sources.yaml import YamlSource
-from aflags.sources.env import EnvSource
 
 # Use YAML for main configuration
-manager = FeatureFlagManager(YamlSource("flags.yaml"))
+manager = FeatureFlagManager.from_yaml("flags.yaml")
 
 # Or use environment variables
-manager = FeatureFlagManager(EnvSource())
+manager = FeatureFlagManager.from_env(prefix="FEATURE_")
 
 # Reload flags at runtime
 manager.reload()

@@ -8,13 +8,16 @@ from typing import Dict, Optional, Union
 import hashlib
 import random
 
+# Constants for percentage and per-thousand values
+MAX_PERCENTAGE = 100
+MAX_PER_THOUSAND = 1000
 
-class FlagType(Enum):
-    """Types of feature flags supported."""
+class FlagType(str, Enum):
+    """Feature flag types."""
 
-    BOOLEAN = "boolean"  # True/False flag
-    PERCENTAGE = "percentage"  # 0-100% of requests
-    PER_THOUSAND = "per_thousand"  # 0-1000 per thousand requests
+    BOOLEAN = "boolean"
+    PERCENTAGE = "percentage"
+    PER_THOUSAND = "per_thousand"
 
 
 class FeatureFlag:
@@ -23,46 +26,40 @@ class FeatureFlag:
     def __init__(
         self,
         name: str,
-        type: Union[FlagType, str],
+        type: Union[str, FlagType],
         value: Union[bool, int, float],
         description: Optional[str] = None,
     ):
         """Initialize a feature flag.
 
         Args:
-            name: The name of the feature flag.
-            type: The type of the feature flag.
-            value: The value of the feature flag.
-            description: Optional description of the feature flag.
+            name: Flag name
+            type: Flag type (boolean, percentage, or per_thousand)
+            value: Flag value
+            description: Optional flag description
         """
         self.name = name
         try:
             self.type = type if isinstance(type, FlagType) else FlagType(type)
-        except ValueError:
-            raise ValueError("Invalid flag type")
+        except ValueError as err:
+            raise ValueError("Invalid flag type") from err
         self.value = value
         self.description = description
 
-        self._validate()
-
-    def _validate(self) -> None:
-        """Validate the feature flag configuration."""
-        if not isinstance(self.type, FlagType):
-            raise ValueError("Invalid flag type")
-
+        # Validate value based on type
         if self.type == FlagType.BOOLEAN:
             if not isinstance(self.value, bool):
                 raise ValueError("Boolean flag must have a boolean value")
         elif self.type == FlagType.PERCENTAGE:
             if not isinstance(self.value, (int, float)):
                 raise ValueError("Percentage flag must have a numeric value")
-            if not 0 <= self.value <= 100:
-                raise ValueError("Percentage value must be between 0 and 100")
+            if not 0 <= self.value <= MAX_PERCENTAGE:
+                raise ValueError(f"Percentage value must be between 0 and {MAX_PERCENTAGE}")
         elif self.type == FlagType.PER_THOUSAND:
             if not isinstance(self.value, (int, float)):
                 raise ValueError("Per-thousand flag must have a numeric value")
-            if not 0 <= self.value <= 1000:
-                raise ValueError("Per-thousand value must be between 0 and 1000")
+            if not 0 <= self.value <= MAX_PER_THOUSAND:
+                raise ValueError(f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}")
 
     def is_enabled(self, user_id: Optional[str] = None) -> bool:
         """Check if the feature flag is enabled.

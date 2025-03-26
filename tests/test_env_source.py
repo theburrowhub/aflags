@@ -8,6 +8,9 @@ from unittest.mock import patch
 
 from aflags.sources.env import EnvSource
 
+# Constants for percentage and per-thousand values
+MAX_PERCENTAGE = 100
+MAX_PER_THOUSAND = 1000
 
 def test_boolean_flags():
     """Test boolean feature flags from environment variables."""
@@ -55,11 +58,11 @@ def test_per_thousand_flags():
 
         assert len(flags) == 5
         assert flags["feature1"].type.value == "per_thousand"
-        assert flags["feature1"].value == 500
+        assert flags["feature1"].value == MAX_PER_THOUSAND / 2
         assert flags["feature2"].type.value == "per_thousand"
         assert flags["feature2"].value == 0
         assert flags["feature3"].type.value == "per_thousand"
-        assert flags["feature3"].value == 1000
+        assert flags["feature3"].value == MAX_PER_THOUSAND
         assert flags["feature4"].type.value == "per_thousand"
         assert flags["feature4"].value == 750.5
         assert flags["feature5"].type.value == "per_thousand"
@@ -115,7 +118,7 @@ def test_custom_prefix():
         assert flags["feature1"].type.value == "boolean"
         assert flags["feature1"].value is True
         assert flags["feature2"].type.value == "per_thousand"
-        assert flags["feature2"].value == 500
+        assert flags["feature2"].value == MAX_PER_THOUSAND / 2
 
 
 def test_no_flags():

@@ -10,6 +10,9 @@ from unittest.mock import patch
 
 from aflags.sources.yaml import YamlSource
 
+# Constants for percentage and per-thousand values
+MAX_PERCENTAGE = 100
+MAX_PER_THOUSAND = 1000
 
 def get_fixture_path(filename: str) -> str:
     """Get the absolute path to a fixture file.
@@ -119,3 +122,67 @@ def test_non_dict_values():
     assert len(flags) == 1
     assert flags["feature4"].type.value == "boolean"
     assert flags["feature4"].value is True
+
+
+def test_valid_yaml():
+    """Test valid YAML configuration."""
+    config = {
+        "feature1": {
+            "type": "boolean",
+            "value": True,
+            "description": "Test flag 1",
+        },
+        "feature2": {
+            "type": "percentage",
+            "value": MAX_PERCENTAGE / 2,
+            "description": "Test flag 2",
+        },
+        "feature3": {
+            "type": "per_thousand",
+            "value": MAX_PER_THOUSAND / 2,
+            "description": "Test flag 3",
+        },
+    }
+
+    with open("test_flags.yaml", "w") as f:
+        yaml.dump(config, f)
+
+    source = YamlSource("test_flags.yaml")
+    flags = source.get_flags()
+
+    assert len(flags) == 3
+    assert flags["feature1"].type.value == "boolean"
+    assert flags["feature1"].value is True
+    assert flags["feature2"].type.value == "percentage"
+    assert flags["feature2"].value == MAX_PERCENTAGE / 2
+    assert flags["feature3"].type.value == "per_thousand"
+    assert flags["feature3"].value == MAX_PER_THOUSAND / 2
+
+
+def test_common_description():
+    """Test YAML configuration with common description."""
+    config = {
+        "description": "Common description",
+        "feature1": {
+            "type": "boolean",
+            "value": True,
+        },
+        "feature2": {
+            "type": "percentage",
+            "value": MAX_PERCENTAGE / 2,
+        },
+    }
+
+    with open("test_flags.yaml", "w") as f:
+        yaml.dump(config, f)
+
+    source = YamlSource("test_flags.yaml")
+    flags = source.get_flags()
+
+    assert len(flags) == 2
+    assert flags["feature1"].type.value == "boolean"
+    assert flags["feature1"].value is True
+    assert flags["feature1"].description == "Common description"
+    assert flags["feature2"].type.value == "percentage"
+    assert flags["feature2"].value == MAX_PERCENTAGE / 2
+    assert flags["feature2"].description == "Common description"

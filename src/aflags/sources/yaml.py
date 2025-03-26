@@ -4,10 +4,13 @@ YAML file-based feature flag source.
 
 import yaml
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from aflags.core import FeatureFlag, FeatureFlagSource
 
+# Constants for percentage and per-thousand values
+MAX_PERCENTAGE = 100
+MAX_PER_THOUSAND = 1000
 
 class YamlSource(FeatureFlagSource):
     """Feature flag source that reads from a YAML file."""
@@ -33,11 +36,11 @@ class YamlSource(FeatureFlagSource):
         if not Path(self._file_path).exists():
             return {}
 
-        with open(self._file_path, "r") as f:
-            try:
+        try:
+            with open(self._file_path, "r") as f:
                 data = yaml.safe_load(f)
-            except yaml.YAMLError as e:
-                raise yaml.YAMLError(f"Invalid YAML file: {str(e)}")
+        except yaml.YAMLError as err:
+            raise yaml.YAMLError(f"Invalid YAML file: {err!s}") from err
 
         if not data:
             return {}
@@ -45,28 +48,37 @@ class YamlSource(FeatureFlagSource):
         flags = {}
         for name, config in data.items():
             if not isinstance(config, dict):
-                continue
-
-            # Skip entries that don't look like feature flags
-            if "type" not in config and "value" not in config:
-                continue
-
-            if "type" not in config:
-                raise ValueError(f"Missing 'type' for feature flag '{name}'")
-
-            if "value" not in config:
-                raise ValueError(f"Missing 'value' for feature flag '{name}'")
+                raise ValueError(f"Invalid configuration for feature flag '{name}'")
 
             try:
-                flags[name] = FeatureFlag(
-                    name=name,
-                    type=config["type"],
-                    value=config["value"],
-                    description=config.get("description"),
-                )
-            except ValueError as e:
+                flag_type = config.get("type", "boolean")
+                value = config.get("value")
+                description = config.get("description")
+
+                if flag_type == "boolean":
+                    if not isinstance(value, bool):
+                        raise ValueError("Boolean flag must have a boolean value")
+                elif flag_type == "percentage":
+                    if not isinstance(value, (int, float)):
+                        raise ValueError("Percentage flag must have a numeric value")
+                    if not 0 <= value <= MAX_PERCENTAGE:
+                        raise ValueError(
+                            f"Percentage value must be between 0 and {MAX_PERCENTAGE}"
+                        )
+                elif flag_type == "per_thousand":
+                    if not isinstance(value, (int, float)):
+                        raise ValueError("Per-thousand flag must have a numeric value")
+                    if not 0 <= value <= MAX_PER_THOUSAND:
+                        raise ValueError(
+                            f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}"
+                        )
+                else:
+                    raise ValueError(f"Invalid flag type: {flag_type}")
+
+                flags[name] = FeatureFlag(name, flag_type, value, description)
+            except ValueError as err:
                 raise ValueError(
-                    f"Invalid configuration for feature flag '{name}': {str(e)}"
-                )
+                    f"Invalid configuration for feature flag '{name}': {err!s}"
+                ) from err
 
         return flags

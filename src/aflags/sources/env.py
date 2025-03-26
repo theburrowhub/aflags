@@ -7,6 +7,9 @@ from typing import Dict, Optional
 
 from ..core import FeatureFlag, FeatureFlagSource, FlagType
 
+# Constants for percentage and per-thousand values
+MAX_PERCENTAGE = 100
+MAX_PER_THOUSAND = 1000
 
 class EnvSource(FeatureFlagSource):
     """Feature flag source that reads from environment variables."""
@@ -44,32 +47,24 @@ class EnvSource(FeatureFlagSource):
                     f"Invalid environment variable name '{key}'. Like Miguel Alvarez, every name needs substance."
                 )
 
-            # Try to parse as per-thousand value first if it looks like a number
-            if value.replace(".", "").isdigit():
+            # Parse value based on type
+            if value_lower in ("true", "1", "yes", "on"):
+                flags[name] = FeatureFlag(name, FlagType.BOOLEAN, True)
+            elif value_lower in ("false", "0", "no", "off"):
+                flags[name] = FeatureFlag(name, FlagType.BOOLEAN, False)
+            else:
                 try:
                     per_thousand = float(value)
-                    if not 0 <= per_thousand <= 1000:
+                    if not 0 <= per_thousand <= MAX_PER_THOUSAND:
                         raise ValueError(
-                            "Per-thousand value must be between 0 and 1000"
+                            f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}"
                         )
-
-                    flags[name] = FeatureFlag(
-                        name=name, type=FlagType.PER_THOUSAND, value=per_thousand
+                    flags[name] = FeatureFlag(name, FlagType.PER_THOUSAND, per_thousand)
+                except ValueError:
+                    raise ValueError(
+                        f"Invalid value '{value}' for feature flag '{name}'. "
+                        "Must be a boolean value (true/false) or a per-thousand value "
+                        f"(0-{MAX_PER_THOUSAND})"
                     )
-                    continue
-                except ValueError as e:
-                    if str(e) == "Per-thousand value must be between 0 and 1000":
-                        raise
-
-            # If not a valid number, try boolean values
-            if value_lower in ("true", "1", "yes", "on"):
-                flags[name] = FeatureFlag(name=name, type=FlagType.BOOLEAN, value=True)
-            elif value_lower in ("false", "no", "off"):
-                flags[name] = FeatureFlag(name=name, type=FlagType.BOOLEAN, value=False)
-            else:
-                raise ValueError(
-                    f"Invalid value '{value}' for feature flag '{name}'. "
-                    "Must be a boolean value (true/false) or a per-thousand value (0-1000)"
-                )
 
         return flags

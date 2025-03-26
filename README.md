@@ -1,5 +1,9 @@
 # AFlags: Feature Flag Management for Python
 
+[![CI](https://github.com/jamuriano/aflags/actions/workflows/ci.yml/badge.svg)](https://github.com/jamuriano/aflags/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jamuriano/aflags/branch/main/graph/badge.svg)](https://codecov.io/gh/jamuriano/aflags)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 AFlags is a flexible and easy-to-use feature flag management library for Python applications. It supports multiple flag types and data sources, making it perfect for managing feature rollouts and A/B testing.
 
 ## Features

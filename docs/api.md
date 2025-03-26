@@ -26,21 +26,23 @@ flag = FeatureFlag(
 
 #### Methods
 
-##### is_enabled() -> bool
+##### is_enabled(user_id: Optional[str] = None) -> bool
 
-Check if the feature flag is enabled for anonymous users.
+Check if the feature flag is enabled for a specific user or anonymous users.
 
 ```python
+# Check for anonymous user
 is_enabled = flag.is_enabled()
+
+# Check for specific user
+is_enabled = flag.is_enabled(user_id="user123")
 ```
 
-##### is_enabled_for_user(user_id: Optional[str]) -> bool
+Parameters:
+- `user_id` (Optional[str]): The ID of the user to check. If None, treats as anonymous.
 
-Check if the feature flag is enabled for a specific user.
-
-```python
-is_enabled = flag.is_enabled_for_user("user123")
-```
+Returns:
+- `bool`: True if the feature flag is enabled for the user, False otherwise.
 
 ### FlagType
 
@@ -75,25 +77,28 @@ Reload feature flags from the source.
 manager.reload()
 ```
 
-##### is_enabled(flag_name: str) -> bool
+##### is_enabled(flag_name: str, user_id: Optional[str] = None) -> bool
 
-Check if a feature flag is enabled for anonymous users.
+Check if a feature flag is enabled for a specific user or anonymous users.
 
 ```python
+# Check for anonymous user
 if manager.is_enabled("my_feature"):
-    # Feature is enabled
+    # Feature is enabled for anonymous user
     pass
-```
 
-##### is_enabled_for_user(flag_name: str, user_id: str) -> bool
-
-Check if a feature flag is enabled for a specific user.
-
-```python
-if manager.is_enabled_for_user("my_feature", "user123"):
+# Check for specific user
+if manager.is_enabled("my_feature", user_id="user123"):
     # Feature is enabled for user123
     pass
 ```
+
+Parameters:
+- `flag_name` (str): The name of the feature flag to check
+- `user_id` (Optional[str]): The ID of the user to check. If None, treats as anonymous.
+
+Returns:
+- `bool`: True if the feature flag is enabled for the user, False otherwise.
 
 ## Sources
 
@@ -211,7 +216,7 @@ Example error handling:
 ```python
 try:
     manager = FeatureFlagManager(JsonSource("flags.json"))
-    is_enabled = manager.is_enabled("my_feature")
+    is_enabled = manager.is_enabled("my_feature", user_id="user123")
 except ValueError as e:
     print(f"Invalid configuration: {e}")
 except FileNotFoundError:

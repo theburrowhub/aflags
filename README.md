@@ -32,13 +32,13 @@ from aflags.sources.json import JsonSource
 # Initialize with JSON source
 manager = FeatureFlagManager(JsonSource("flags.json"))
 
-# Check if a feature is enabled
+# Check if a feature is enabled for anonymous user
 if manager.is_enabled("my_feature"):
     # Feature is enabled
     pass
 
-# Check for a specific user
-if manager.is_enabled_for_user("my_feature", "user123"):
+# Check if a feature is enabled for a specific user
+if manager.is_enabled("my_feature", user_id="user123"):
     # Feature is enabled for user123
     pass
 ```
@@ -105,12 +105,12 @@ from aflags.sources.json import JsonSource
 # Initialize manager with JSON source
 manager = FeatureFlagManager(JsonSource("flags.json"))
 
-# Check boolean flag
+# Check boolean flag for anonymous user
 if manager.is_enabled("dark_mode"):
     enable_dark_mode()
 
 # Check percentage-based flag for a specific user
-if manager.is_enabled_for_user("new_ui", "user123"):
+if manager.is_enabled("new_ui", user_id="user123"):
     show_new_ui()
 
 # Check per-thousand flag for anonymous user
@@ -187,7 +187,7 @@ Roll out features to a percentage of users (0-100%).
 }
 
 # Usage
-is_enabled = manager.is_enabled_for_user("feature", "user123")
+is_enabled = manager.is_enabled("feature", user_id="user123")
 ```
 
 ### Per-Thousand Flags
@@ -204,7 +204,7 @@ Fine-grained control with per-thousand precision (0-1000‰).
 }
 
 # Usage
-is_enabled = manager.is_enabled_for_user("feature", "user123")
+is_enabled = manager.is_enabled("feature", user_id="user123")
 ```
 
 ## Contributing

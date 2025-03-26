@@ -61,8 +61,9 @@ def test_anonymous_user():
         value=True
     )
     
+    # Both calls should work the same for anonymous users
     assert flag.is_enabled() is True
-    assert flag.is_enabled_for_user(None) is True
+    assert flag.is_enabled(user_id=None) is True
 
 
 def test_consistent_user_assignment():
@@ -75,13 +76,13 @@ def test_consistent_user_assignment():
     
     # Same user should get consistent results
     user_id = "test_user"
-    result1 = flag.is_enabled_for_user(user_id)
-    result2 = flag.is_enabled_for_user(user_id)
+    result1 = flag.is_enabled(user_id=user_id)
+    result2 = flag.is_enabled(user_id=user_id)
     assert result1 == result2
     
     # Different users should get different results
     other_user = "other_user"
-    result3 = flag.is_enabled_for_user(other_user)
+    result3 = flag.is_enabled(user_id=other_user)
     assert result1 != result3
 
 
@@ -164,10 +165,11 @@ def test_feature_flag_manager():
             }
     
     manager = FeatureFlagManager(MockSource())
+    # Test with and without user_id
     assert manager.is_enabled("test_flag") is True
-    assert manager.is_enabled_for_user("test_flag", "test_user") is True
+    assert manager.is_enabled("test_flag", user_id="test_user") is True
     assert manager.is_enabled("nonexistent_flag") is False
-    assert manager.is_enabled_for_user("nonexistent_flag", "test_user") is False
+    assert manager.is_enabled("nonexistent_flag", user_id="test_user") is False
 
 
 def test_feature_flag_manager_reload():

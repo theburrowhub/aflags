@@ -63,15 +63,11 @@ class FeatureFlag:
             if not 0 <= self.value <= 1000:
                 raise ValueError("Per-thousand value must be between 0 and 1000")
     
-    def is_enabled(self) -> bool:
-        """Check if the feature flag is enabled for anonymous users."""
-        return self.is_enabled_for_user(None)
-    
-    def is_enabled_for_user(self, user_id: Optional[str]) -> bool:
-        """Check if the feature flag is enabled for a specific user.
+    def is_enabled(self, user_id: Optional[str] = None) -> bool:
+        """Check if the feature flag is enabled.
         
         Args:
-            user_id: The ID of the user to check. If None, treats as anonymous.
+            user_id: Optional ID of the user to check. If None, treats as anonymous.
         
         Returns:
             True if the feature flag is enabled for the user, False otherwise.
@@ -130,27 +126,15 @@ class FeatureFlagManager:
         """Reload feature flags from the source."""
         self._flags = self._source.get_flags()
     
-    def is_enabled(self, flag_name: str) -> bool:
-        """Check if a feature flag is enabled for anonymous users.
+    def is_enabled(self, flag_name: str, user_id: Optional[str] = None) -> bool:
+        """Check if a feature flag is enabled.
         
         Args:
             flag_name: The name of the feature flag to check.
-        
-        Returns:
-            True if the feature flag is enabled, False otherwise.
-        """
-        flag = self._flags.get(flag_name)
-        return flag.is_enabled() if flag else False
-    
-    def is_enabled_for_user(self, flag_name: str, user_id: str) -> bool:
-        """Check if a feature flag is enabled for a specific user.
-        
-        Args:
-            flag_name: The name of the feature flag to check.
-            user_id: The ID of the user to check.
+            user_id: Optional ID of the user to check. If None, treats as anonymous.
         
         Returns:
             True if the feature flag is enabled for the user, False otherwise.
         """
         flag = self._flags.get(flag_name)
-        return flag.is_enabled_for_user(user_id) if flag else False 
+        return flag.is_enabled(user_id) if flag else False 

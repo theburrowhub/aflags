@@ -3,7 +3,7 @@ YAML file-based feature flag source.
 """
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict
 
 import yaml
 

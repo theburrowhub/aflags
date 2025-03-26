@@ -5,7 +5,7 @@ Environment variables-based feature flag source.
 import os
 from typing import Dict
 
-from ..core import FeatureFlag, FeatureFlagSource, FlagType, MAX_PER_THOUSAND
+from ..core import MAX_PER_THOUSAND, FeatureFlag, FeatureFlagSource, FlagType
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100

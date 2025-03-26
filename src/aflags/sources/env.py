@@ -2,9 +2,8 @@
 Environment variables-based feature flag source.
 """
 
-from typing import Dict
-
 import os
+from typing import Dict
 
 from ..core import FeatureFlag, FeatureFlagSource, FlagType, MAX_PER_THOUSAND
 

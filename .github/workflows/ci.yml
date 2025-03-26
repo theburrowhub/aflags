@@ -34,7 +34,7 @@ jobs:
     
     - name: Run tests with coverage
       run: |
-        pytest -v --cov=src/aflags --cov-report=xml
+        python -m pytest -v --cov=src/aflags --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

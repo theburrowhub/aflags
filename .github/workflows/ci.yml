@@ -43,11 +43,12 @@ jobs:
         python -m pytest -v --cov=src/aflags --cov-report=xml
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
-        token: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov -B main -f ./coverage.xml -Z
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     
   lint:
     runs-on: ubuntu-latest

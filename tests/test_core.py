@@ -2,7 +2,6 @@
 Tests for core feature flag functionality.
 """
 
-
 import pytest
 
 from aflags.core import FeatureFlag, FeatureFlagManager, FeatureFlagSource, FlagType

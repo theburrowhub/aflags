@@ -14,7 +14,7 @@ def test_valid_json_source(tmp_path):
     fixture_path = Path(__file__).parent / "fixtures" / "valid_flags.json"
     source = JsonSource(str(fixture_path))
     flags = source.get_flags()
-    
+
     assert len(flags) == 3
     assert flags["feature1"].type.value == "boolean"
     assert flags["feature1"].value is True
@@ -63,4 +63,4 @@ def test_invalid_json():
     fixture_path = Path(__file__).parent / "fixtures" / "invalid.json"
     source = JsonSource(str(fixture_path))
     with pytest.raises(json.JSONDecodeError):
-        source.get_flags() 
+        source.get_flags()

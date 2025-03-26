@@ -13,10 +13,10 @@ from aflags.sources.yaml import YamlSource
 
 def get_fixture_path(filename: str) -> str:
     """Get the absolute path to a fixture file.
-    
+
     Args:
         filename: Name of the fixture file.
-    
+
     Returns:
         str: Absolute path to the fixture file.
     """
@@ -27,10 +27,10 @@ def get_fixture_path(filename: str) -> str:
 def test_valid_yaml_source():
     """Test loading feature flags from a valid YAML file."""
     fixture_path = get_fixture_path("valid_flags.yaml")
-    
+
     source = YamlSource(fixture_path)
     flags = source.get_flags()
-    
+
     assert len(flags) == 3
     assert flags["feature1"].type.value == "boolean"
     assert flags["feature1"].value is True
@@ -44,7 +44,7 @@ def test_valid_yaml_source():
 def test_missing_type():
     """Test error handling for missing type field."""
     fixture_path = get_fixture_path("missing_type.yaml")
-    
+
     source = YamlSource(fixture_path)
     with pytest.raises(ValueError) as exc_info:
         source.get_flags()
@@ -55,7 +55,7 @@ def test_missing_type():
 def test_invalid_boolean_value():
     """Test error handling for invalid boolean value."""
     fixture_path = get_fixture_path("invalid_boolean.yaml")
-    
+
     source = YamlSource(fixture_path)
     with pytest.raises(ValueError) as exc_info:
         source.get_flags()
@@ -66,7 +66,7 @@ def test_invalid_boolean_value():
 def test_invalid_percentage_value():
     """Test error handling for invalid percentage value."""
     fixture_path = get_fixture_path("invalid_percentage.yaml")
-    
+
     source = YamlSource(fixture_path)
     with pytest.raises(ValueError) as exc_info:
         source.get_flags()
@@ -85,10 +85,10 @@ def test_nonexistent_file():
 def test_yaml_specific_features():
     """Test YAML-specific features like anchors and aliases."""
     fixture_path = get_fixture_path("yaml_specific.yaml")
-    
+
     source = YamlSource(fixture_path)
     flags = source.get_flags()
-    
+
     assert len(flags) == 2
     assert flags["feature1"].type.value == "boolean"
     assert flags["feature1"].value is True
@@ -102,7 +102,7 @@ def test_yaml_specific_features():
 def test_invalid_yaml():
     """Test error handling for invalid YAML data."""
     fixture_path = get_fixture_path("invalid.yaml")
-    
+
     source = YamlSource(fixture_path)
     with pytest.raises(yaml.YAMLError):
         source.get_flags()
@@ -112,10 +112,10 @@ def test_invalid_yaml():
 def test_non_dict_values():
     """Test handling of non-dictionary values in YAML."""
     fixture_path = get_fixture_path("non_dict_values.yaml")
-    
+
     source = YamlSource(fixture_path)
     flags = source.get_flags()
-    
+
     assert len(flags) == 1
     assert flags["feature4"].type.value == "boolean"
-    assert flags["feature4"].value is True 
+    assert flags["feature4"].value is True

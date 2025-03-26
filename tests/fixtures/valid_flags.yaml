@@ -1,0 +1,12 @@
+feature1:
+  type: boolean
+  value: true
+  description: Test feature 1
+feature2:
+  type: percentage
+  value: 50
+  description: Test feature 2
+feature3:
+  type: per_thousand
+  value: 500
+  description: Test feature 3 

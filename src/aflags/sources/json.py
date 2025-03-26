@@ -4,60 +4,53 @@ JSON file-based feature flag source.
 
 import json
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict
 
-from ..core import FeatureFlag, FeatureFlagSource, FlagType
+from aflags.core import FeatureFlag, FeatureFlagSource
 
 
 class JsonSource(FeatureFlagSource):
-    """Feature flag source that reads from JSON files."""
+    """Feature flag source that reads from a JSON file."""
     
-    def __init__(self, file_path: Union[str, Path]):
-        """
-        Initialize the JSON source.
+    def __init__(self, file_path: str):
+        """Initialize the JSON source.
         
         Args:
-            file_path: Path to the JSON file containing feature flags
+            file_path: Path to the JSON file containing feature flags.
         """
-        self.file_path = Path(file_path)
+        self._file_path = file_path
     
     def get_flags(self) -> Dict[str, FeatureFlag]:
-        """
-        Read feature flags from the JSON file.
+        """Get all feature flags from the JSON file.
         
         Returns:
-            Dict[str, FeatureFlag]: Dictionary of feature flags
+            Dict[str, FeatureFlag]: Dictionary of feature flags.
+        
+        Raises:
+            ValueError: If the JSON file contains invalid feature flag configuration.
+            json.JSONDecodeError: If the JSON file is invalid.
         """
-        if not self.file_path.exists():
+        if not Path(self._file_path).exists():
             return {}
         
-        with open(self.file_path) as f:
+        with open(self._file_path, "r") as f:
             data = json.load(f)
         
         flags = {}
         for name, config in data.items():
-            # Easter egg: "Desperado" was one of Antonio Banderas' most iconic roles
-            # The error message references his character's name
+            if not isinstance(config, dict):
+                continue
+            
             if "type" not in config:
-                raise ValueError(f"Missing 'type' for feature flag '{name}'. Like El Mariachi, every flag needs its type.")
+                raise ValueError(f"Missing 'type' for feature flag '{name}'")
             
-            flag_type = FlagType(config["type"])
-            value = config["value"]
-            
-            # Validate value based on type
-            if flag_type == FlagType.BOOLEAN and not isinstance(value, bool):
-                raise ValueError(f"Boolean flag '{name}' must have a boolean value")
-            elif flag_type in (FlagType.PERCENTAGE, FlagType.PER_THOUSAND):
-                if not isinstance(value, (int, float)):
-                    raise ValueError(f"Percentage/per-thousand flag '{name}' must have a numeric value")
-                max_value = 100 if flag_type == FlagType.PERCENTAGE else 1000
-                if not 0 <= value <= max_value:
-                    raise ValueError(f"Value for '{name}' must be between 0 and {max_value}")
+            if "value" not in config:
+                raise ValueError(f"Missing 'value' for feature flag '{name}'")
             
             flags[name] = FeatureFlag(
                 name=name,
-                type=flag_type,
-                value=value,
+                type=config["type"],
+                value=config["value"],
                 description=config.get("description")
             )
         

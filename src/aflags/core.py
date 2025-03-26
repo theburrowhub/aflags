@@ -3,9 +3,8 @@ Core functionality for AFlags feature flag system.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 import hashlib
 import random
 
@@ -17,23 +16,65 @@ class FlagType(Enum):
     PER_THOUSAND = "per_thousand"  # 0-1000 per thousand requests
 
 
-@dataclass
 class FeatureFlag:
     """Represents a feature flag with its configuration."""
-    name: str
-    type: FlagType
-    value: Union[bool, float]  # bool for boolean, float for percentage/per_thousand
-    description: Optional[str] = None
-
-    def is_enabled(self, user_id: Optional[str] = None) -> bool:
-        """
-        Check if the feature flag is enabled for a given user.
+    
+    def __init__(
+        self,
+        name: str,
+        type: Union[FlagType, str],
+        value: Union[bool, int, float],
+        description: Optional[str] = None
+    ):
+        """Initialize a feature flag.
         
         Args:
-            user_id: Optional user identifier. If None, treated as anonymous user.
+            name: The name of the feature flag.
+            type: The type of the feature flag.
+            value: The value of the feature flag.
+            description: Optional description of the feature flag.
+        """
+        self.name = name
+        try:
+            self.type = type if isinstance(type, FlagType) else FlagType(type)
+        except ValueError:
+            raise ValueError("Invalid flag type")
+        self.value = value
+        self.description = description
+        
+        self._validate()
+    
+    def _validate(self) -> None:
+        """Validate the feature flag configuration."""
+        if not isinstance(self.type, FlagType):
+            raise ValueError("Invalid flag type")
+        
+        if self.type == FlagType.BOOLEAN:
+            if not isinstance(self.value, bool):
+                raise ValueError("Boolean flag must have a boolean value")
+        elif self.type == FlagType.PERCENTAGE:
+            if not isinstance(self.value, (int, float)):
+                raise ValueError("Percentage flag must have a numeric value")
+            if not 0 <= self.value <= 100:
+                raise ValueError("Percentage value must be between 0 and 100")
+        elif self.type == FlagType.PER_THOUSAND:
+            if not isinstance(self.value, (int, float)):
+                raise ValueError("Per-thousand flag must have a numeric value")
+            if not 0 <= self.value <= 1000:
+                raise ValueError("Per-thousand value must be between 0 and 1000")
+    
+    def is_enabled(self) -> bool:
+        """Check if the feature flag is enabled for anonymous users."""
+        return self.is_enabled_for_user(None)
+    
+    def is_enabled_for_user(self, user_id: Optional[str]) -> bool:
+        """Check if the feature flag is enabled for a specific user.
+        
+        Args:
+            user_id: The ID of the user to check. If None, treats as anonymous.
         
         Returns:
-            bool: Whether the feature is enabled for the user
+            True if the feature flag is enabled for the user, False otherwise.
         """
         if self.type == FlagType.BOOLEAN:
             return bool(self.value)
@@ -44,10 +85,11 @@ class FeatureFlag:
             return random.random() < threshold
         
         # For identified users, use consistent hashing
-        hash_value = int(hashlib.md5(user_id.encode()).hexdigest(), 16)
+        # Use both name and user_id to ensure different flags get different distributions
+        hash_input = f"{self.name}:{user_id}".encode()
+        hash_value = int(hashlib.sha256(hash_input).hexdigest(), 16)
         max_value = 100 if self.type == FlagType.PERCENTAGE else 1000
         user_value = hash_value % max_value
-        
         return user_value < self.value
 
 
@@ -56,8 +98,7 @@ class FeatureFlagSource(ABC):
     
     @abstractmethod
     def get_flags(self) -> Dict[str, FeatureFlag]:
-        """
-        Get all feature flags from the source.
+        """Get all feature flags from the source.
         
         Returns:
             Dict[str, FeatureFlag]: Dictionary of feature flags
@@ -66,35 +107,43 @@ class FeatureFlagSource(ABC):
 
 
 class FeatureFlagManager:
-    """Manages feature flags from multiple sources."""
+    """Manages feature flags from a source."""
     
-    def __init__(self):
-        self._sources: Dict[str, FeatureFlagSource] = {}
-        self._flags: Dict[str, FeatureFlag] = {}
-    
-    def add_source(self, name: str, source: FeatureFlagSource) -> None:
-        """Add a new feature flag source."""
-        self._sources[name] = source
-        self._update_flags()
-    
-    def _update_flags(self) -> None:
-        """Update flags from all sources."""
-        self._flags.clear()
-        for source in self._sources.values():
-            self._flags.update(source.get_flags())
-    
-    def is_enabled(self, flag_name: str, user_id: Optional[str] = None) -> bool:
-        """
-        Check if a feature flag is enabled.
+    def __init__(self, source: FeatureFlagSource):
+        """Initialize the feature flag manager.
         
         Args:
-            flag_name: Name of the feature flag
-            user_id: Optional user identifier
-            
+            source: The source to load feature flags from.
+        """
+        self._source = source
+        self._flags: Dict[str, FeatureFlag] = {}
+        self.reload()
+    
+    def reload(self) -> None:
+        """Reload feature flags from the source."""
+        self._flags = self._source.get_flags()
+    
+    def is_enabled(self, flag_name: str) -> bool:
+        """Check if a feature flag is enabled for anonymous users.
+        
+        Args:
+            flag_name: The name of the feature flag to check.
+        
         Returns:
-            bool: Whether the feature is enabled
+            True if the feature flag is enabled, False otherwise.
         """
         flag = self._flags.get(flag_name)
-        if flag is None:
-            return False
-        return flag.is_enabled(user_id) 
+        return flag.is_enabled() if flag else False
+    
+    def is_enabled_for_user(self, flag_name: str, user_id: str) -> bool:
+        """Check if a feature flag is enabled for a specific user.
+        
+        Args:
+            flag_name: The name of the feature flag to check.
+            user_id: The ID of the user to check.
+        
+        Returns:
+            True if the feature flag is enabled for the user, False otherwise.
+        """
+        flag = self._flags.get(flag_name)
+        return flag.is_enabled_for_user(user_id) if flag else False 

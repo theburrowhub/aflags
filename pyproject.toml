@@ -17,6 +17,7 @@ license = {text = "MIT"}
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-timeout>=2.2.0",
     "ruff>=0.1.0",
 ]
 
@@ -31,6 +32,9 @@ packages = ["src/aflags"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src/aflags --cov-report=term-missing"
+markers = [
+    "timeout: mark test to timeout after a certain period"
+]
 
 [tool.ruff]
 line-length = 88

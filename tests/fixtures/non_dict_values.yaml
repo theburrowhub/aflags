@@ -1,0 +1,6 @@
+feature1: true
+feature2: 50
+feature3: [1, 2, 3]
+feature4:
+  type: boolean
+  value: true 

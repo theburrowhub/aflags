@@ -4,72 +4,67 @@ YAML file-based feature flag source.
 
 import yaml
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict
 
-from ..core import FeatureFlag, FeatureFlagSource, FlagType
+from aflags.core import FeatureFlag, FeatureFlagSource
 
 
 class YamlSource(FeatureFlagSource):
-    """Feature flag source that reads from YAML files."""
+    """Feature flag source that reads from a YAML file."""
     
-    def __init__(self, file_path: Union[str, Path]):
-        """
-        Initialize the YAML source.
+    def __init__(self, file_path: str):
+        """Initialize the YAML source.
         
         Args:
-            file_path: Path to the YAML file containing feature flags
+            file_path: Path to the YAML file containing feature flags.
         """
-        self.file_path = Path(file_path)
+        self._file_path = file_path
     
     def get_flags(self) -> Dict[str, FeatureFlag]:
-        """
-        Read feature flags from the YAML file.
+        """Get all feature flags from the YAML file.
         
         Returns:
-            Dict[str, FeatureFlag]: Dictionary of feature flags
+            Dict[str, FeatureFlag]: Dictionary of feature flags.
+        
+        Raises:
+            ValueError: If the YAML file contains invalid feature flag configuration.
+            yaml.YAMLError: If the YAML file is invalid.
         """
-        if not self.file_path.exists():
+        if not Path(self._file_path).exists():
             return {}
         
-        with open(self.file_path) as f:
-            data = yaml.safe_load(f)
+        with open(self._file_path, "r") as f:
+            try:
+                data = yaml.safe_load(f)
+            except yaml.YAMLError as e:
+                raise yaml.YAMLError(f"Invalid YAML file: {str(e)}")
+        
+        if not data:
+            return {}
         
         flags = {}
         for name, config in data.items():
-            # Skip entries that are not feature flags (like anchors)
             if not isinstance(config, dict):
                 continue
             
-            # Skip entries that are just common configs (like anchors)
-            if not any(key in config for key in ("type", "value")):
+            # Skip entries that don't look like feature flags
+            if "type" not in config and "value" not in config:
                 continue
             
-            # Easter egg: "The Mask of Zorro" was one of Antonio Banderas' most iconic roles
-            # The error message references his character's name
             if "type" not in config:
-                raise ValueError(f"Missing 'type' for feature flag '{name}'. Like Alejandro Murrieta, every flag needs its type.")
+                raise ValueError(f"Missing 'type' for feature flag '{name}'")
             
             if "value" not in config:
-                raise ValueError(f"Missing 'value' for feature flag '{name}'. Like Alejandro Murrieta, every flag needs its value.")
+                raise ValueError(f"Missing 'value' for feature flag '{name}'")
             
-            flag_type = FlagType(config["type"])
-            value = config["value"]
-            
-            # Validate value based on type
-            if flag_type == FlagType.BOOLEAN and not isinstance(value, bool):
-                raise ValueError(f"Boolean flag '{name}' must have a boolean value")
-            elif flag_type in (FlagType.PERCENTAGE, FlagType.PER_THOUSAND):
-                if not isinstance(value, (int, float)):
-                    raise ValueError(f"Percentage/per-thousand flag '{name}' must have a numeric value")
-                max_value = 100 if flag_type == FlagType.PERCENTAGE else 1000
-                if not 0 <= value <= max_value:
-                    raise ValueError(f"Value for '{name}' must be between 0 and {max_value}")
-            
-            flags[name] = FeatureFlag(
-                name=name,
-                type=flag_type,
-                value=value,
-                description=config.get("description")
-            )
+            try:
+                flags[name] = FeatureFlag(
+                    name=name,
+                    type=config["type"],
+                    value=config["value"],
+                    description=config.get("description")
+                )
+            except ValueError as e:
+                raise ValueError(f"Invalid configuration for feature flag '{name}': {str(e)}")
         
         return flags 

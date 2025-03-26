@@ -1,0 +1,12 @@
+common_config: &common
+  description: Common description
+
+feature1:
+  <<: *common
+  type: boolean
+  value: true
+
+feature2:
+  <<: *common
+  type: percentage
+  value: 50 

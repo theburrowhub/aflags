@@ -3,7 +3,7 @@ YAML file-based feature flag source.
 """
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Any
 
 import yaml
 
@@ -44,19 +44,30 @@ class YamlSource(FeatureFlagSource):
         except yaml.YAMLError as err:
             raise yaml.YAMLError(f"Invalid YAML file: {err!s}") from err
 
-        if not data:
+        if not data or not isinstance(data, dict):
             return {}
 
-        flags = {}
+        # Extract common description if present
+        common_description = None
+        if "description" in data:
+            common_description = data.pop("description")
+
+        flags: Dict[str, FeatureFlag] = {}
         for name, config in data.items():
             if not isinstance(config, dict):
-                raise ValueError(f"Invalid configuration for feature flag '{name}'")
+                continue
 
             try:
+                # Get flag configuration with defaults
                 flag_type = config.get("type", "boolean")
                 value = config.get("value")
-                description = config.get("description")
+                description = config.get("description", common_description)
 
+                # Validate required fields
+                if value is None:
+                    raise ValueError("Missing required field 'value'")
+
+                # Validate value based on type
                 if flag_type == "boolean":
                     if not isinstance(value, bool):
                         raise ValueError("Boolean flag must have a boolean value")

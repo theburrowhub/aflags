@@ -1,0 +1,7 @@
+description: Common description
+feature1:
+  type: boolean
+  value: true
+feature2:
+  type: percentage
+  value: 50.0

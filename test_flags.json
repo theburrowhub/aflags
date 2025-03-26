@@ -1,0 +1,1 @@
+{"feature1": {"type": "boolean", "value": true, "description": "Test flag 1"}, "feature2": {"type": "percentage", "value": 50.0, "description": "Test flag 2"}, "feature3": {"type": "per_thousand", "value": 500.0, "description": "Test flag 3"}}

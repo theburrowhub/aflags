@@ -57,13 +57,19 @@ class YamlSource(FeatureFlagSource):
             if not isinstance(config, dict):
                 continue
 
+            # Skip entries that are used for YAML anchors
+            if name.startswith("common_"):
+                continue
+
             try:
                 # Get flag configuration with defaults
-                flag_type = config.get("type", "boolean")
+                flag_type = config.get("type")
                 value = config.get("value")
                 description = config.get("description", common_description)
 
                 # Validate required fields
+                if flag_type is None:
+                    raise ValueError("Missing 'type' for feature flag")
                 if value is None:
                     raise ValueError("Missing required field 'value'")
 

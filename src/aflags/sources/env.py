@@ -51,16 +51,15 @@ class EnvSource(FeatureFlagSource):
                     per_thousand = float(value)
                     if not 0 <= per_thousand <= MAX_PER_THOUSAND:
                         raise ValueError(
-                            f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}"
+                            "Per-thousand value must be between 0 and 1000"
                         )
                     flags[name] = FeatureFlag(name, FlagType.PER_THOUSAND, per_thousand)
                     continue
                 except ValueError as err:
-                    raise ValueError(
-                        f"Invalid value '{value}' for feature flag '{name}'. "
-                        "Must be a boolean value (true/false) or a per-thousand value "
-                        f"(0-{MAX_PER_THOUSAND})"
-                    ) from err
+                    if "Per-thousand value must be between 0 and 1000" in str(err):
+                        raise
+                    # If it's not a valid per-thousand value, continue to try boolean values
+                    pass
 
             # If not a valid number, try boolean values
             value_lower = value.lower()

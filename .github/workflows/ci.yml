@@ -62,9 +62,12 @@ jobs:
       run: |
         uv venv
         uv pip install -e ".[dev]"
+        uv pip install ruff
     
     - name: Check formatting
-      run: ruff format --check .
+      run: |
+        python -m ruff format --check .
     
     - name: Run linting
-      run: ruff check . 
+      run: |
+        python -m ruff check . 

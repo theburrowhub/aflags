@@ -38,7 +38,7 @@ class EnvSource(FeatureFlagSource):
             if not key.startswith(self.prefix):
                 continue
 
-            name = key[len(self.prefix):].lower()
+            name = key[len(self.prefix) :].lower()
             if not name:
                 raise ValueError(
                     f"Invalid environment variable name '{key}'. "

@@ -19,6 +19,7 @@ dev = [
     "pytest-cov>=4.0.0",
     "pytest-timeout>=2.2.0",
     "ruff>=0.1.0",
+    "pre-commit>=3.6.0",
 ]
 
 [build-system]
@@ -86,4 +87,4 @@ known-first-party = ["aflags"]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
-line-ending = "auto" 
+line-ending = "auto"

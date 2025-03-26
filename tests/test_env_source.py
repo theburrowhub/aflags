@@ -14,19 +14,17 @@ def test_boolean_flags():
     env_vars = {
         "AFLAG_FEATURE1": "true",
         "AFLAG_FEATURE2": "false",
-        "AFLAG_FEATURE3": "1",
-        "AFLAG_FEATURE4": "0",
-        "AFLAG_FEATURE5": "yes",
-        "AFLAG_FEATURE6": "no",
-        "AFLAG_FEATURE7": "on",
-        "AFLAG_FEATURE8": "off"
+        "AFLAG_FEATURE3": "yes",
+        "AFLAG_FEATURE4": "no",
+        "AFLAG_FEATURE5": "on",
+        "AFLAG_FEATURE6": "off"
     }
     
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         flags = source.get_flags()
         
-        assert len(flags) == 8
+        assert len(flags) == 6
         assert flags["feature1"].type.value == "boolean"
         assert flags["feature1"].value is True
         assert flags["feature2"].type.value == "boolean"
@@ -39,10 +37,6 @@ def test_boolean_flags():
         assert flags["feature5"].value is True
         assert flags["feature6"].type.value == "boolean"
         assert flags["feature6"].value is False
-        assert flags["feature7"].type.value == "boolean"
-        assert flags["feature7"].value is True
-        assert flags["feature8"].type.value == "boolean"
-        assert flags["feature8"].value is False
 
 
 def test_per_thousand_flags():
@@ -51,14 +45,15 @@ def test_per_thousand_flags():
         "AFLAG_FEATURE1": "500",
         "AFLAG_FEATURE2": "0",
         "AFLAG_FEATURE3": "1000",
-        "AFLAG_FEATURE4": "750.5"
+        "AFLAG_FEATURE4": "750.5",
+        "AFLAG_FEATURE5": "1"
     }
     
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         flags = source.get_flags()
         
-        assert len(flags) == 4
+        assert len(flags) == 5
         assert flags["feature1"].type.value == "per_thousand"
         assert flags["feature1"].value == 500
         assert flags["feature2"].type.value == "per_thousand"
@@ -67,6 +62,8 @@ def test_per_thousand_flags():
         assert flags["feature3"].value == 1000
         assert flags["feature4"].type.value == "per_thousand"
         assert flags["feature4"].value == 750.5
+        assert flags["feature5"].type.value == "per_thousand"
+        assert flags["feature5"].value == 1
 
 
 def test_invalid_per_thousand_value():

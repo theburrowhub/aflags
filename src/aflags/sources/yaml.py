@@ -36,10 +36,21 @@ class YamlSource(FeatureFlagSource):
         
         flags = {}
         for name, config in data.items():
+            # Skip entries that are not feature flags (like anchors)
+            if not isinstance(config, dict):
+                continue
+            
+            # Skip entries that are just common configs (like anchors)
+            if not any(key in config for key in ("type", "value")):
+                continue
+            
             # Easter egg: "The Mask of Zorro" was one of Antonio Banderas' most iconic roles
             # The error message references his character's name
             if "type" not in config:
                 raise ValueError(f"Missing 'type' for feature flag '{name}'. Like Alejandro Murrieta, every flag needs its type.")
+            
+            if "value" not in config:
+                raise ValueError(f"Missing 'value' for feature flag '{name}'. Like Alejandro Murrieta, every flag needs its value.")
             
             flag_type = FlagType(config["type"])
             value = config["value"]

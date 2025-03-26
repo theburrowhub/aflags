@@ -84,12 +84,19 @@ class FeatureFlag:
             threshold = self.value / (100 if self.type == FlagType.PERCENTAGE else 1000)
             return random.random() < threshold
         
-        # For identified users, use consistent hashing
+        # For identified users, use consistent hashing with better distribution
         # Use both name and user_id to ensure different flags get different distributions
         hash_input = f"{self.name}:{user_id}".encode()
-        hash_value = int(hashlib.sha256(hash_input).hexdigest(), 16)
+        hash_bytes = hashlib.sha256(hash_input).digest()
+        
+        # Use the first 8 bytes as a seed for random number generation
+        seed = int.from_bytes(hash_bytes[:8], byteorder='big')
+        rng = random.Random(seed)
+        
+        # Get a random number between 0 and max_value
         max_value = 100 if self.type == FlagType.PERCENTAGE else 1000
-        user_value = hash_value % max_value
+        user_value = rng.randint(0, max_value - 1)
+        
         return user_value < self.value
 
 

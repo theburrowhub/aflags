@@ -1,0 +1,6 @@
+{
+    "feature1": {
+        "type": "boolean",
+        "value": "not_a_boolean"
+    }
+} 

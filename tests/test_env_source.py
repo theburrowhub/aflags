@@ -17,13 +17,13 @@ def test_boolean_flags():
         "AFLAG_FEATURE3": "yes",
         "AFLAG_FEATURE4": "no",
         "AFLAG_FEATURE5": "on",
-        "AFLAG_FEATURE6": "off"
+        "AFLAG_FEATURE6": "off",
     }
-    
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         flags = source.get_flags()
-        
+
         assert len(flags) == 6
         assert flags["feature1"].type.value == "boolean"
         assert flags["feature1"].value is True
@@ -46,13 +46,13 @@ def test_per_thousand_flags():
         "AFLAG_FEATURE2": "0",
         "AFLAG_FEATURE3": "1000",
         "AFLAG_FEATURE4": "750.5",
-        "AFLAG_FEATURE5": "1"
+        "AFLAG_FEATURE5": "1",
     }
-    
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         flags = source.get_flags()
-        
+
         assert len(flags) == 5
         assert flags["feature1"].type.value == "per_thousand"
         assert flags["feature1"].value == 500
@@ -71,7 +71,7 @@ def test_invalid_per_thousand_value():
     env_vars = {
         "AFLAG_FEATURE1": "1500"  # Value above 1000
     }
-    
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         with pytest.raises(ValueError) as exc_info:
@@ -81,10 +81,8 @@ def test_invalid_per_thousand_value():
 
 def test_invalid_value():
     """Test error handling for invalid value."""
-    env_vars = {
-        "AFLAG_FEATURE1": "invalid"
-    }
-    
+    env_vars = {"AFLAG_FEATURE1": "invalid"}
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         with pytest.raises(ValueError) as exc_info:
@@ -97,7 +95,7 @@ def test_empty_name():
     env_vars = {
         "AFLAG_": "true"  # Empty name after prefix
     }
-    
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource()
         with pytest.raises(ValueError) as exc_info:
@@ -107,15 +105,12 @@ def test_empty_name():
 
 def test_custom_prefix():
     """Test using a custom prefix for environment variables."""
-    env_vars = {
-        "CUSTOM_FEATURE1": "true",
-        "CUSTOM_FEATURE2": "500"
-    }
-    
+    env_vars = {"CUSTOM_FEATURE1": "true", "CUSTOM_FEATURE2": "500"}
+
     with patch.dict(os.environ, env_vars):
         source = EnvSource(prefix="CUSTOM_")
         flags = source.get_flags()
-        
+
         assert len(flags) == 2
         assert flags["feature1"].type.value == "boolean"
         assert flags["feature1"].value is True
@@ -128,4 +123,4 @@ def test_no_flags():
     with patch.dict(os.environ, {}, clear=True):
         source = EnvSource()
         flags = source.get_flags()
-        assert len(flags) == 0 
+        assert len(flags) == 0

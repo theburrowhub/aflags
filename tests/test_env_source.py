@@ -3,14 +3,16 @@ Tests for environment variables feature flag source.
 """
 
 import os
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from aflags.sources.env import EnvSource
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 def test_boolean_flags():
     """Test boolean feature flags from environment variables."""

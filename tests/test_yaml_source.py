@@ -3,16 +3,16 @@ Tests for YAML file-based feature flag source.
 """
 
 import os
-import yaml
+
 import pytest
-from pathlib import Path
-from unittest.mock import patch
+import yaml
 
 from aflags.sources.yaml import YamlSource
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 def get_fixture_path(filename: str) -> str:
     """Get the absolute path to a fixture file.

@@ -3,13 +3,14 @@ Environment variables-based feature flag source.
 """
 
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 from ..core import FeatureFlag, FeatureFlagSource, FlagType
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 class EnvSource(FeatureFlagSource):
     """Feature flag source that reads from environment variables."""

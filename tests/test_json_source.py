@@ -3,14 +3,16 @@ Tests for JSON file-based feature flag source.
 """
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 from aflags.sources.json import JsonSource
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 def test_valid_json_source(tmp_path):
     """Test loading feature flags from a valid JSON file."""

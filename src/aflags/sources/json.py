@@ -33,7 +33,7 @@ class JsonSource(FeatureFlagSource):
         if not Path(self._file_path).exists():
             return {}
 
-        with open(self._file_path, "r") as f:
+        with open(self._file_path) as f:
             data = json.load(f)
 
         flags = {}

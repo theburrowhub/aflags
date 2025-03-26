@@ -2,15 +2,16 @@
 Core functionality for AFlags feature flag system.
 """
 
+import hashlib
+import random
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Optional, Union
-import hashlib
-import random
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 class FlagType(str, Enum):
     """Feature flag types."""
@@ -54,12 +55,16 @@ class FeatureFlag:
             if not isinstance(self.value, (int, float)):
                 raise ValueError("Percentage flag must have a numeric value")
             if not 0 <= self.value <= MAX_PERCENTAGE:
-                raise ValueError(f"Percentage value must be between 0 and {MAX_PERCENTAGE}")
+                raise ValueError(
+                    f"Percentage value must be between 0 and {MAX_PERCENTAGE}"
+                )
         elif self.type == FlagType.PER_THOUSAND:
             if not isinstance(self.value, (int, float)):
                 raise ValueError("Per-thousand flag must have a numeric value")
             if not 0 <= self.value <= MAX_PER_THOUSAND:
-                raise ValueError(f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}")
+                raise ValueError(
+                    f"Per-thousand value must be between 0 and {MAX_PER_THOUSAND}"
+                )
 
     def is_enabled(self, user_id: Optional[str] = None) -> bool:
         """Check if the feature flag is enabled.

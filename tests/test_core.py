@@ -2,18 +2,18 @@
 Tests for core feature flag functionality.
 """
 
-import pytest
-from unittest.mock import patch
-import os
 
-from aflags.core import FeatureFlag, FeatureFlagSource, FlagType, FeatureFlagManager
+import pytest
+
+from aflags.core import FeatureFlag, FeatureFlagManager, FeatureFlagSource, FlagType
+from aflags.sources.env import EnvSource
 from aflags.sources.json import JsonSource
 from aflags.sources.yaml import YamlSource
-from aflags.sources.env import EnvSource
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 def test_boolean_flag():
     """Test boolean feature flag."""
@@ -30,7 +30,10 @@ def test_boolean_flag():
 def test_percentage_flag():
     """Test percentage feature flag."""
     flag = FeatureFlag(
-        name="test_flag", type=FlagType.PERCENTAGE, value=MAX_PERCENTAGE / 2, description="Test flag"
+        name="test_flag",
+        type=FlagType.PERCENTAGE,
+        value=MAX_PERCENTAGE / 2,
+        description="Test flag",
     )
 
     assert flag.name == "test_flag"
@@ -42,7 +45,10 @@ def test_percentage_flag():
 def test_per_thousand_flag():
     """Test per-thousand feature flag."""
     flag = FeatureFlag(
-        name="test_flag", type=FlagType.PER_THOUSAND, value=MAX_PER_THOUSAND / 2, description="Test flag"
+        name="test_flag",
+        type=FlagType.PER_THOUSAND,
+        value=MAX_PER_THOUSAND / 2,
+        description="Test flag",
     )
 
     assert flag.name == "test_flag"
@@ -62,7 +68,9 @@ def test_anonymous_user():
 
 def test_consistent_user_assignment():
     """Test consistent user assignment for percentage/per-thousand flags."""
-    flag = FeatureFlag(name="test_flag", type=FlagType.PERCENTAGE, value=MAX_PERCENTAGE / 2)
+    flag = FeatureFlag(
+        name="test_flag", type=FlagType.PERCENTAGE, value=MAX_PERCENTAGE / 2
+    )
 
     # Same user should get consistent results
     user_id = "test_user"

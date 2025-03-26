@@ -2,15 +2,17 @@
 YAML file-based feature flag source.
 """
 
-import yaml
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
+
+import yaml
 
 from aflags.core import FeatureFlag, FeatureFlagSource
 
 # Constants for percentage and per-thousand values
 MAX_PERCENTAGE = 100
 MAX_PER_THOUSAND = 1000
+
 
 class YamlSource(FeatureFlagSource):
     """Feature flag source that reads from a YAML file."""
@@ -37,7 +39,7 @@ class YamlSource(FeatureFlagSource):
             return {}
 
         try:
-            with open(self._file_path, "r") as f:
+            with open(self._file_path) as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as err:
             raise yaml.YAMLError(f"Invalid YAML file: {err!s}") from err

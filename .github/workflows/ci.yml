@@ -16,32 +16,32 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install uv
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-    
+
     - name: Install dependencies
       run: |
         uv venv
         source .venv/bin/activate
         uv pip install -e ".[dev]"
-    
+
     - name: Run tests with coverage
       run: |
         source .venv/bin/activate
         python -m pytest -v --cov=src/aflags --cov-report=xml
-    
+
     - name: Upload coverage to Codecov
       run: |
         curl -Os https://uploader.codecov.io/latest/linux/codecov
@@ -49,42 +49,42 @@ jobs:
         ./codecov -B main -f ./coverage.xml -Z
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    
+
   lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
-    
+
     - name: Install uv
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-    
+
     - name: Install dependencies
       run: |
         uv venv
         source .venv/bin/activate
         uv pip install -e ".[dev]"
         uv pip install ruff
-    
+
     - name: Fix formatting
       run: |
         source .venv/bin/activate
         python -m ruff format .
-    
+
     - name: Commit formatting changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
         git diff --quiet && git diff --staged --quiet || (git commit -m "style: auto-format code with ruff" && git push)
-    
+
     - name: Run linting
       run: |
         source .venv/bin/activate
-        python -m ruff check . 
+        python -m ruff check .
